@@ -1,0 +1,84 @@
+[submodule "odoo/addons/odoo-shopinvader"]
+	path = odoo/addons/odoo-shopinvader
+	url = https://github.com/shopinvader/odoo-shopinvader.git
+	branch = 16.0
+[submodule "odoo/addons/rest-framework"]
+	path = odoo/addons/rest-framework
+	url = git@github.com:OCA/rest-framework.git
+	branch = 16.0
+[submodule "odoo/addons/server-tools"]
+	path = odoo/addons/server-tools
+	url = git@github.com:OCA/server-tools.git
+	branch = 16.0
+[submodule "odoo/addons/connector"]
+	path = odoo/addons/connector
+	url = git@github.com:OCA/connector.git
+	branch = 16.0
+[submodule "odoo/addons/queue"]
+	path = odoo/addons/queue
+	url = git@github.com:OCA/queue.git
+	branch = 16.0
+[submodule "odoo/addons/sale-workflow"]
+	path = odoo/addons/sale-workflow
+	url = git@github.com:OCA/sale-workflow.git
+	branch = 16.0
+[submodule "odoo/addons/server-env"]
+	path = odoo/addons/server-env
+	url = git@github.com:OCA/server-env.git
+	branch = 16.0
+[submodule "odoo/addons/sale-channel"]
+	path = odoo/addons/sale-channel
+	url = git@github.com:OCA/sale-channel.git
+	branch = 16.0
+[submodule "odoo/addons/odoo-shopinvader-payment"]
+	path = odoo/addons/odoo-shopinvader-payment
+	url = git@github.com:shopinvader/odoo-shopinvader-payment.git
+	branch = 16.0
+[submodule "odoo/addons/search-engine"]
+	path = odoo/addons/search-engine
+	url = git@github.com:OCA/search-engine.git
+	branch = 16.0
+[submodule "odoo/addons/odoo-shopinvader-carrier"]
+	path = odoo/addons/odoo-shopinvader-carrier
+	url = git@github.com:shopinvader/odoo-shopinvader-carrier.git
+	branch = 16.0
+[submodule "odoo/addons/storage"]
+	path = odoo/addons/storage
+	url = git@github.com:OCA/storage.git
+	branch = 16.0
+[submodule "odoo/addons/web-api"]
+	path = odoo/addons/web-api
+	url = git@github.com:OCA/web-api.git
+	branch = 16.0
+[submodule "odoo/addons/delivery-carrier"]
+	path = odoo/addons/delivery-carrier
+	url = git@github.com:OCA/delivery-carrier.git
+	branch = 16.0
+[submodule "odoo/addons/sale-promotion"]
+	path = odoo/addons/sale-promotion
+	url = git@github.com:OCA/sale-promotion.git
+	branch = 16.0
+[submodule "odoo/addons/reporting-engine"]
+	path = odoo/addons/reporting-engine
+	url = git@github.com:OCA/reporting-engine.git
+	branch = 16.0
+[submodule "odoo/addons/server-auth"]
+	path = odoo/addons/server-auth
+	url = git@github.com:OCA/server-auth.git
+	branch = 16.0
+[submodule "odoo/addons/product-attribute"]
+	path = odoo/addons/product-attribute
+	url = git@github.com:OCA/product-attribute.git
+	branch = 16.0
+[submodule "odoo/addons/e-commerce"]
+	path = odoo/addons/e-commerce
+	url = git@github.com:OCA/e-commerce.git
+	branch = 16.0
+[submodule "odoo/addons/brand"]
+	path = odoo/addons/brand
+	url = git@github.com:OCA/brand.git
+	branch = 16.0
+[submodule "shopinvader/template"]
+	path = shopinvader/template
+	url = git@github.com:shopinvader/shopinvader-template-nuxtjs.git
+	branch = main

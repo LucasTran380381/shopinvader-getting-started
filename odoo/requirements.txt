@@ -1,0 +1,66 @@
+# API and Schema
+a2wsgi>=1.10.6
+apispec>=4.0.0
+extendable==1.2.0
+extendable_pydantic==1.2.1
+fastapi==0.110.0
+pydantic==2.0.2
+
+# Data Processing
+cerberus
+graphene
+graphql_server
+jsondiff
+marshmallow
+marshmallow-objects>=2.0.0
+pyquerystring
+
+# Authentication & Security
+cryptography
+email_validator
+pyjwt
+pysaml2
+python-jose
+python-ldap
+
+# File Operations
+endesive
+fsspec>=2024.5.0
+openpyxl
+paramiko
+py3o.formats
+py3o.template
+pysftp
+
+# Search & Integration
+elasticsearch>=7.0.0,<=7.13.4
+roulier
+zeep
+
+# Utilities
+astor
+cachetools
+dataclasses
+dnspython
+parse-accept-language
+python-multipart
+python-slugify
+typing-extensions
+ujson
+unidecode
+
+# OAuth
+oauthlib
+requests-oauthlib
+requests
+
+# Testing & Development
+freezegun
+mock
+odoo_test_helper
+odoorpc
+openupgradelib
+pygount
+
+# Monitoring
+sentry_sdk<=1.9.0

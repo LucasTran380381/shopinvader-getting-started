@@ -1,121 +1,64 @@
 services:
-  mongodb:
-    image: mongo:3
-    volumes:
-      - mongodb:/data/db
-  locomotive:
-    image: quay.io/shopinvader/locomotive-shopinvader-demo:V4.0.x-20200423-1120
-    environment:
-      - RAILS_ENV=development
-      - STORE_ASSET_IN_S3=false
-      - DRAGON_FLY_SECRET=thisISaDEMOkeyNOTsecret
-      - MONGODB_DEV_HOST=mongodb
-      - LOCOMOTIVE_ADMIN_SSL_REDIRECT=false
-      - LOCOMOTIVE_ENABLE_REGISTRATION=true
-    volumes:
-      - usr_src_app_log:/usr/src/app/tmp
-      - usr_src_app_tmp:/usr/src/app/log
-      - usr_src_app_public_sites:/usr/src/app/public/sites
-      - usr_src_app_public_uploaded:/usr/src/app/public/uploaded_assets
-    depends_on:
-      - mongodb
-      - elastic
-    labels:
-      - "traefik.enable=true"
-      - "traefik.port=3000"
-      - "traefik.http.routers.locomotive.rule=Host(`locomotive.localhost`)"
-      - "traefik.http.routers.front.rule=HostRegexp(`{subdomain:[A-Za-z0-9\\-]+}.front.localhost`)"
-  pgdb:
-    environment:
-      - POSTGRES_USER=odoo
-      - POSTGRES_DB=db
-    image: quay.io/akretion/postgresql:10
-    volumes:
-      - pgdb:/var/lib/postgresql/data
-  elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.0.0
-    environment:
-      discovery.type: single-node
-      http.cors.enabled: "true"
-      http.cors.allow-origin: "*"
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
-    labels:
-      - "traefik.enable=true"
-      - "traefik.port=9200"
-      - "traefik.http.routers.elastic.rule=Host(`elastic.localhost`)"
   odoo:
-    build: ./containers/odoo
-    volumes:
-      - data-odoo:/data/odoo
-    environment:
-      RUNNING_ENV: demo
-      DB_USER: odoo
-      DB_PASSWORD: odoo
-      DB_NAME: odoo-shopinvader-demo
-      DB_HOST: pgdb
-      SERVER_WIDE_MODULES: web,queue_job
-      ODOO_QUEUE_JOB_CHANNEL: =root:4,root.search_engine:4,root.search_engine.recompute_json:4,root.search_engine.prepare_batch_export:4
-      ADMIN_PASSWD: admin
-      UNACCENT: "true"
-      LIMIT_TIME_CPU: 900
-      LIMIT_TIME_REAL: 1800
-      MAX_CRON_THREADS: 1
-      LOG_LEVEL: info
-      ADDITIONAL_ODOO_RC: |-
-        [ir.config_parameter]
-        report.url=http://odoo:8069
-        web.base.url=http://odoo.localhost
-      KWKHTMLTOPDF_SERVER_URL: http://kwkhtmltopdf:8080
+    build: odoo
     depends_on:
-      - pgdb
-      - locomotive
+      - db
       - elastic
-      - kwkhtmltopdf
-    labels:
-      - "traefik.enable=true"
-      - "traefik.port=8069"
-      - "traefik.http.routers.odoo.rule=Host(`odoo.localhost`)"
-      - "traefik.http.routers.odoo_long.rule=Host(`odoo.localhost`) && PathPrefix(`/longpolling/`)"
-      - "traefik.http.services.odoo_long.loadbalancer.server.port=8072"
-  kwkhtmltopdf:
-    image: acsone/kwkhtmltopdf
-  wagon:
-    image: quay.io/shopinvader/wagon:v4.0.x-20200423
+    ports:
+      - "8069:8069"
+      - "8072:8072"
     volumes:
-      - ./template:/workspace
-    entrypoint: /usr/local/bin/entrypoint gosu ubuntu bash
-    hostname: wagon
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.wagon.rule=Host(`wagon.localhost`)"
-      - "traefik.http.services.wagon.loadbalancer.server.port=3333"
-  traefik:
-      image: traefik:v2.0
-      command: --providers.docker --providers.docker.exposedbydefault=false
-      ports:
-          # Please do not change the following port
-          # This demo have configured for running on the port 80
-          # changing the port will break the connexion between
-          # odoo - locomotive - elastic
-          - "127.0.0.1:80:80"
-      volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
-      networks:
-        default:
-          aliases:
-            - odoo.localhost
-            - elastic.localhost
-            - locomotive.localhost
-            - wagon.localhost
-
-version: '3'
+      - ./odoo/addons:/mnt/extra-addons
+      - ./odoo/odoo.conf:/etc/odoo/odoo.conf
+      - odoo-web-data:/var/lib/odoo
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+  shopinvader:
+    build: shopinvader
+    ports:
+      - "3000:3000"
+    depends_on:
+      - odoo
+      - elastic
+    environment:
+      - SASS_NO_DEPRECATION_WARNINGS=1
+      - NUXT_PUBLIC_SHOPINVADER_ERP_URL=http://odoo:8069/shopinvader_demo
+      - NUXT_PUBLIC_SHOPINVADER_ELASTICSEARCH_URL=http://localhost:9200
+      - NUXT_PUBLIC_SHOPINVADER_ELASTICSEARCH_INDICES_PRODUCTS=demo_elasticsearch_backend_product_variant
+      - NUXT_PUBLIC_SHOPINVADER_ELASTICSEARCH_INDICES_CATEGORIES=demo_elasticsearch_backend_product_category
+    volumes:
+      - ./shopinvader/template:/app/template
+      - /app/template/node_modules
+  elastic:
+    image: elasticsearch:7.17.10
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=admin
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.authc.accept_default_password=true
+      - xpack.security.authc.anonymous.username=anonymous
+      - xpack.security.authc.anonymous.roles=anonymous_role
+      - xpack.security.authc.anonymous.authz_exception=false
+      # CORS settings
+      - http.cors.enabled=true
+      - "http.cors.allow-origin=*"  # Allow all origins
+      - http.cors.allow-methods=OPTIONS,HEAD,GET,POST,PUT,DELETE
+      - "http.cors.allow-headers=Authorization,X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Accept"
+      - http.cors.allow-credentials=true
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
 volumes:
-  data-odoo:
-  usr_src_app_log:
-  usr_src_app_tmp:
-  usr_src_app_public_sites:
-  usr_src_app_public_uploaded:
+  odoo-web-data:
+  odoo-db-data:
+  elasticsearch_data:
   mongodb:
-  pgdb:
-  esdata:

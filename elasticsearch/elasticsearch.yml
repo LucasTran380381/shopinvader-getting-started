@@ -1,0 +1,7 @@
+discovery.type: single-node
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+xpack.security.enabled: true
+xpack.security.authc.anonymous.username: anonymous_user
+xpack.security.authc.anonymous.roles: anonymous_role
+xpack.security.authc.anonymous.authz_exception: false

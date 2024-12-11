@@ -1,0 +1,215 @@
+#FROM python:3.12-slim-bookworm
+#
+#ENV PYTHONUNBUFFERED=1 \
+#    DEBIAN_FRONTEND=noninteractive \
+#    LANG=C.UTF-8 \
+#    LC_ALL=C.UTF-8
+#
+## Install system dependencies
+#RUN apt-get update && apt-get install -y \
+#    build-essential \
+#    curl \
+#    git \
+#    libldap2-dev \
+#    libpq-dev \
+#    libsasl2-dev \
+#    libxml2-dev \
+#    libxslt1-dev \
+#    postgresql-client \
+#    python3-dev \
+#    fontconfig \
+#    libfreetype6 \
+#    libjpeg62-turbo \
+#    libpng16-16 \
+#    libx11-6 \
+#    libxcb1 \
+#    libxext6 \
+#    libxrender1 \
+#    xfonts-75dpi \
+#    xfonts-base \
+#    && rm -rf /var/lib/apt/lists/*
+#
+## Install wkhtmltopdf for ARM64
+#RUN curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_arm64.deb \
+#    && dpkg -i wkhtmltox.deb || true \
+#    && apt-get update \
+#    && apt-get install -f -y \
+#    && rm wkhtmltox.deb \
+#    && rm -rf /var/lib/apt/lists/*
+#
+## Create odoo user
+#RUN useradd -ms /bin/bash odoo
+#
+## Clone Odoo
+#RUN git clone --depth=1 -b 16.0 https://github.com/odoo/odoo.git /odoo/src/odoo
+#
+## Install base Python dependencies with cache
+#ADD https://raw.githubusercontent.com/odoo/odoo/16.0/requirements.txt /odoo/requirements.txt
+#RUN --mount=type=cache,target=/root/.cache/pip \
+#    pip install -r /odoo/requirements.txt \
+#    && pip install -e /odoo/src/odoo
+#
+## Configure directories
+#RUN mkdir -p /var/lib/odoo \
+#    && mkdir -p /mnt/extra-addons \
+#    && chown -R odoo:odoo /odoo /var/lib/odoo /mnt/extra-addons
+#
+## Install requirements from each addon module with cache
+#COPY ./addons /mnt/extra-addons
+#RUN find /mnt/extra-addons -name "requirements.txt" -type f -exec pip install -r {} \;
+#
+## Install fsspec and s3fs for AWS support with cache
+#RUN pip install \
+#    fsspec[s3] \
+#    s3fs \
+#    boto3 \
+#    pydantic \
+#    fastapi \
+#    extendable \
+#    extendable-pydantic \
+#    marabunta
+#
+## Create additional Odoo directories
+#RUN mkdir -p /home/odoo/.local/share/Odoo/filestore \
+#    && chown -R odoo:odoo /home/odoo/.local
+#
+## Add entrypoint script
+#COPY entrypoint.sh /entrypoint.sh
+#RUN chmod +x /entrypoint.sh
+#
+#VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/home/odoo/.local/share/Odoo"]
+#EXPOSE 8069 8072
+#
+#USER odoo
+#
+#ENTRYPOINT ["/entrypoint.sh"]
+
+FROM ubuntu:noble
+#SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        dirmngr \
+        fonts-noto-cjk \
+        gnupg \
+        libssl-dev \
+        node-less \
+        npm \
+        python3-magic \
+        python3-num2words \
+        python3-odf \
+        python3-pdfminer \
+        python3-pip \
+        python3-phonenumbers \
+        python3-pyldap \
+        python3-qrcode \
+        python3-renderpm \
+        python3-setuptools \
+        python3-slugify \
+        python3-vobject \
+        python3-watchdog \
+        python3-xlrd \
+        python3-xlwt \
+        xz-utils
+
+# install latest postgresql-client
+RUN apt-get update  \
+    && apt-get install --no-install-recommends -y postgresql-client \
+    && rm -f /etc/apt/sources.list.d/pgdg.list \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install rtlcss (on Debian buster)
+RUN npm install -g rtlcss
+
+# Install Odoo
+ENV ODOO_VERSION=16.0
+RUN git clone --depth 1 -b ${ODOO_VERSION} https://github.com/odoo/odoo.git /odoo-src
+RUN cd /odoo-src && bash ./setup/debinstall.sh
+RUN apt-get install -y \
+    python3-unidecode \
+    pipx \
+    python3-zeep \
+    python3-acme \
+    python3-astor \
+    python3-cryptography \
+    python3-dnspython \
+    python3-josepy \
+    python3-mako \
+    python3-odoorpc \
+    python3-openpyxl \
+    python3-sentry-sdk \
+    python3-elasticsearch \
+    python3-pydantic \
+    python3-requests \
+    python3-typing-extensions \
+    python3-fastapi \
+    python3-fsspec \
+    python3-paramiko \
+    python3-slugify \
+    python3-oauthlib \
+    python3-requests-oauthlib \
+    python3-freezegun \
+    python3-cachetools \
+    python3-a2wsgi \
+    python3-apispec \
+    python3-cerberus \
+    python3-graphene \
+    python3-jsondiff \
+    python3-marshmallow \
+    python3-ujson \
+    python3-endesive \
+    python3-mock \
+    python3-email-validator \
+    python3-pysaml2 \
+    python3-ldap
+
+RUN pipx install --include-deps\
+    roulier \
+    dataclasses \
+    odoo-test-helper \
+    openupgradelib \
+    pygount \
+    pysftp \
+    extendable-pydantic \
+    contextvars \
+    graphql-server \
+    marshmallow-objects \
+    parse-accept-language \
+    pyquerystring \
+    python-multipart \
+    pyjwt \
+    py3o.formats \
+    py3o.template \
+    python-jose
+
+# Copy entrypoint script and Odoo configuration file
+COPY ./entrypoint.sh /
+COPY ./odoo.conf /etc/odoo/
+
+# Create Odoo user and group
+RUN groupadd -r odoo && useradd -r -g odoo -m -d /opt/odoo odoo
+# Set permissions and Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
+RUN chown odoo /etc/odoo/odoo.conf \
+    && mkdir -p /var/lib/odoo \
+    && chown odoo /var/lib/odoo \
+    && mkdir -p /mnt/extra-addons \
+    && chown -R odoo /mnt/extra-addons
+VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
+
+# Expose Odoo services
+EXPOSE 8069 8071 8072
+
+# Set the default config file
+ENV ODOO_RC=/etc/odoo/odoo.conf
+
+COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
+
+# Set default user when running the container
+USER odoo
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/odoo-src/odoo-bin"]

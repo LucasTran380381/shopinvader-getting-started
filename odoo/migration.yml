@@ -1,0 +1,13 @@
+migration:
+  options:
+    install_command: odoo
+  versions:
+    - version: setup
+      operations:
+        pre:
+          - echo 'Starting installation of shopinvader modules'
+        post:
+          - echo 'Installation complete'
+      addons:
+        upgrade:
+          - base
