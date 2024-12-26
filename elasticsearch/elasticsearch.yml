@@ -1,7 +1,20 @@
-discovery.type: single-node
-http.cors.enabled: true
-http.cors.allow-origin: "*"
+# Enable security
 xpack.security.enabled: true
-xpack.security.authc.anonymous.username: anonymous_user
-xpack.security.authc.anonymous.roles: anonymous_role
-xpack.security.authc.anonymous.authz_exception: false
+
+# Authentication configuration
+xpack.security.authc:
+  realms:
+    native:
+      native1:
+        order: 0
+  anonymous:
+    username: anonymous_user
+    roles: shopinvader
+    authz_exception: true
+
+# Basic settings
+network.host: 0.0.0.0
+discovery.type: single-node
+
+# Set default password
+elasticsearch.password: admin

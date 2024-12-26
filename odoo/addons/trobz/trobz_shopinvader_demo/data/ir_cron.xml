@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2021 Camptocamp (http://www.camptocamp.com).
+    @author Iván Todorovich <ivan.todorovich@gmail.com>
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record
+        id="shopinvader_search_engine_assortment.ir_cron_autobind_product_from_assortment"
+        model="ir.cron"
+    >
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="active" eval="True" />
+    </record>
+</odoo>

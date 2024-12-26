@@ -2,13 +2,13 @@ FROM python:3.11
 
 USER root
 # Install system dependencies
-RUN apt-get update && apt-get install -y postgresql-client python3-pip libldap2-dev libpq-dev libsasl2-dev \
+RUN apt-get update && apt-get install -y postgresql-client python3-pip python3-dev build-essential libevent-dev libldap2-dev libpq-dev libsasl2-dev \
     && rm -rf /var/lib/apt/lists/*
 # Install pip and upgrade it
-RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade pip setuptools wheel
 # Install Odoo dependencies
-RUN pip3 install -r https://raw.githubusercontent.com/odoo/odoo/16.0/requirements.txt
-# Install Odoo (adjust the version as needed)
+RUN pip3 install -v -r https://raw.githubusercontent.com/odoo/odoo/16.0/requirements.txt
+# Install Odoo
 RUN git clone --depth 1 -b 16.0 https://github.com/odoo/odoo.git /odoo-src
 RUN pip3 install -e /odoo-src
 

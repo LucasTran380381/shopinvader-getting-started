@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2019 ACSONE SA/NV
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <record id="se_backend_shopinvader_demo" model="se.backend">
+        <field name="name">Shopinvader Trobz Demo Elasticsearch Backend</field>
+        <field name="tech_name">se_backend_shopinvader_demo</field>
+        <field name="es_server_host">http://elasticsearch:9200</field>
+        <field name="backend_type">elasticsearch</field>
+        <field name="product_manual_binding" eval="False"/>
+        <field name="product_assortment_id" ref="shopinvader_search_engine_assortment.shopinvader_assortment1"/>
+        <field name="auth_type">http</field>
+        <field name="es_user">elastic</field>
+        <field name="es_password">admin</field>
+        <field name="ssl" eval="False"/>
+    </record>
+</odoo>

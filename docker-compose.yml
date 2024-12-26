@@ -3,7 +3,7 @@ services:
     build: odoo
     depends_on:
       - db
-      - elastic
+      - elasticsearch
     ports:
       - "8069:8069"
       - "8072:8072"
@@ -25,17 +25,17 @@ services:
       - "3000:3000"
     depends_on:
       - odoo
-      - elastic
+      - elasticsearch
     environment:
       - SASS_NO_DEPRECATION_WARNINGS=1
-      - NUXT_PUBLIC_SHOPINVADER_ERP_URL=http://odoo:8069/shopinvader_demo
+      - NUXT_PUBLIC_SHOPINVADER_ERP_URL=http://localhost:8069/shopinvader_demo
       - NUXT_PUBLIC_SHOPINVADER_ELASTICSEARCH_URL=http://localhost:9200
-      - NUXT_PUBLIC_SHOPINVADER_ELASTICSEARCH_INDICES_PRODUCTS=demo_elasticsearch_backend_product_variant
-      - NUXT_PUBLIC_SHOPINVADER_ELASTICSEARCH_INDICES_CATEGORIES=demo_elasticsearch_backend_product_category
+      - NUXT_PUBLIC_SHOPINVADER_ELASTICSEARCH_INDICES_PRODUCTS=se_backend_shopinvader_demo_product_variant
+      - NUXT_PUBLIC_SHOPINVADER_ELASTICSEARCH_INDICES_CATEGORIES=se_backend_shopinvader_demo_product_category
     volumes:
       - ./shopinvader/template:/app/template
       - /app/template/node_modules
-  elastic:
+  elasticsearch:
     image: elasticsearch:7.17.10
     ports:
       - "9200:9200"
@@ -47,16 +47,29 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - xpack.security.authc.accept_default_password=true
       - xpack.security.authc.anonymous.username=anonymous
-      - xpack.security.authc.anonymous.roles=anonymous_role
+      - xpack.security.authc.anonymous.roles=shopinvader
       - xpack.security.authc.anonymous.authz_exception=false
-      # CORS settings
       - http.cors.enabled=true
-      - "http.cors.allow-origin=*"  # Allow all origins
+      - "http.cors.allow-origin=*"
       - http.cors.allow-methods=OPTIONS,HEAD,GET,POST,PUT,DELETE
       - "http.cors.allow-headers=Authorization,X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Accept"
       - http.cors.allow-credentials=true
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+  elasticsearch-setup:
+    image: curlimages/curl
+    depends_on:
+      - elasticsearch
+    command: >
+      sh -c '
+      until curl -s -u elastic:admin http://elasticsearch:9200 > /dev/null; do 
+        echo "Waiting for elasticsearch...";
+        sleep 2; 
+      done;
+      if ! curl -s -u elastic:admin "http://elasticsearch:9200/_security/role/shopinvader" | grep -q "shopinvader"; then
+        curl -X PUT -u elastic:admin "http://elasticsearch:9200/_security/role/shopinvader" -H "Content-Type: application/json" -d '\''{"indices":[{"names":["se_backend_shopinvader_demo*"],"privileges":["read","view_index_metadata"]}]}'\''
+      fi'
+    restart: on-failure:5
 volumes:
   odoo-web-data:
   odoo-db-data:
